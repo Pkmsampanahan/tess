@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GARDENA - Pengaturan Panel Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root { 
+            --primary: #db2777; 
+            --accent: #6366f1; 
+            --bg: #f1f5f9; 
+            --card-bg: #ffffff; 
+            --border-color: #e2e8f0; 
+            --sat: env(safe-area-inset-top);
+            --sar: env(safe-area-inset-right);
+            --sab: env(safe-area-inset-bottom);
+            --sal: env(safe-area-inset-left);
+        }
+        
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; }
+        
+        body { 
+            background-color: var(--bg); 
+            height: 100dvh; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
+        
+        .app-container { 
+            width: 100%; max-width: 500px; background: var(--card-bg); height: 100dvh; 
+            display: flex; flex-direction: column; position: relative; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden;
+            padding-left: var(--sal); padding-right: var(--sar);
+        }
+
+        .pink-header { 
+            background: linear-gradient(135deg, #db2777 0%, #be185d 40%, #6366f1 100%); 
+            padding-top: calc(1.5rem + var(--sat));
+            border-radius: 0 0 35px 35px;
+            z-index: 50;
+            flex-shrink: 0;
+        }
+
+        .scroll-content {
+            flex: 1; overflow-y: auto; padding: 20px;
+            padding-bottom: calc(100px + var(--sab));
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .scroll-content::-webkit-scrollbar { display: none; }
+
+        .glass-card {
+            background: white; border: 1px solid var(--border-color);
+            border-radius: 24px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-label {
+            font-size: 10px; font-weight: 800; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 8px; display: block;
+        }
+
+        input, select {
+            width: 100%; padding: 12px 16px; background: #f8fafc;
+            border: 1px solid #e2e8f0; border-radius: 14px;
+            font-size: 13px; font-weight: 700; color: #1e293b;
+            outline: none;
+        }
+        input:focus { border-color: var(--primary); background: white; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #db2777, #6366f1);
+            color: white; padding: 16px; border-radius: 18px;
+            font-weight: 800; width: 100%; border: none;
+            cursor: pointer; box-shadow: 0 8px 20px rgba(219, 39, 119, 0.3);
+        }
+        .btn-primary:active { transform: scale(0.96); opacity: 0.9; }
+
+        .btn-danger { background: #fee2e2; color: #ef4444; font-size: 9px; font-weight: 900; padding: 6px 12px; border-radius: 10px; text-transform: uppercase; }
+        .btn-danger:active { opacity: 0.6; }
+
+        #loading-overlay {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(8px); z-index: 3000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        #modal-auth {
+            position: fixed; inset: 0; background: var(--bg); z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px;
+        }
+
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #e2e8f0; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .bottom-nav {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: white; border-top: 1px solid var(--border-color);
+            padding: 15px 20px calc(20px + var(--sab)) 20px;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 30px 30px 0 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.02);
+        }
+
+        .btn-gps {
+            background: #f0f9ff;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+        }
+        .btn-gps:active { background: #e0f2fe; transform: scale(0.95); }
+
+        .tab-btn {
+            font-size: 10px; font-weight: 800; padding: 8px 12px; border-radius: 10px;
+            background: #f1f5f9; color: #64748b; text-transform: uppercase;
+        }
+        .tab-btn.active { background: #db2777; color: white; }
+
+        .range-container { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #f1f5f9; }
+        
+        .badge-info {
+            background: #eff6ff; color: #3b82f6; padding: 4px 8px; border-radius: 6px; font-size: 8px; font-weight: 800; text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div id="modal-auth">
+    <div class="w-full max-w-sm text-center space-y-6">
+        <div class="w-20 h-20 bg-pink-100 text-pink-600 rounded-3xl flex items-center justify-center text-3xl mx-auto shadow-inner">👤</div>
+        <div>
+            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Admin Access</h2>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">GARDENA - KOTABARU</p>
+        </div>
+        <div class="space-y-4">
+            <input type="password" id="admin-password" autofocus
+                   class="text-center text-2xl tracking-[0.5em] font-black py-5 border-2 focus:border-pink-500 rounded-[22px]" 
+                   placeholder="•••••" oninput="checkPass(this.value)">
+            <p id="error-msg" class="text-[10px] font-bold text-red-500 uppercase hidden">Sandi Tidak Sesuai!</p>
+        </div>
+        <button onclick="location.href='index.html'" class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] opacity-60">⬅️ Kembali ke Aplikasi</button>
+    </div>
+</div>
+
+<div id="loading-overlay">
+    <div class="w-12 h-12 border-4 border-pink-600 border-t-transparent rounded-full animate-spin"></div>
+    <p id="loading-text" class="mt-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center px-6"></p>
+</div>
+
+<div class="app-container">
+    <div class="pink-header p-6 text-white text-center shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+            <button onclick="location.href='index.html'" class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-xl text-sm active:scale-90">🏠</button>
+            <h2 class="text-xl font-black tracking-tighter">CONTROL PANEL</h2>
+            <button onclick="window.open('https://script.google.com/home', '_blank')" class="text-[10px] bg-white/20 px-3 py-1.5 rounded-lg font-black uppercase active:scale-95">Cloud</button>
+        </div>
+        <p class="text-[9px] font-bold opacity-70 uppercase tracking-[0.2em]">Management Systems v1.2.1</p>
+    </div>
+
+    <div class="scroll-content">
+        <div class="glass-card">
+            <div class="flex items-center gap-3 mb-5 border-b border-slate-50 pb-3">
+                <span class="text-xl">👥</span>
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-sm">Manajemen Petugas</h3>
+                    <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Hapus database wajah & akun</p>
+                </div>
+            </div>
+            <div id="user-list-container" class="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+                <p class="text-[10px] text-center py-6 text-slate-400 font-bold uppercase">Menghubungkan Database...</p>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="flex items-center gap-3 mb-5 border-b border-slate-50 pb-3">
+                <span class="text-xl">⚙️⚡</span>
+                <h3 class="font-extrabold text-slate-800 text-sm uppercase">Saklar Fitur</h3>
+            </div>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <label class="input-label mb-0">Pendaftaran Mandiri</label>
+                    <label class="switch"><input type="checkbox" id="toggle-reg"><span class="slider"></span></label>
+                </div>
+                <div class="flex justify-between items-center">
+                    <label class="input-label mb-0">Mode Maintenance</label>
+                    <label class="switch"><input type="checkbox" id="toggle-mt"><span class="slider"></span></label>
+                </div>
+                <div class="flex justify-between items-center">
+                    <label class="input-label mb-0">Bypass GPS (Darurat)</label>
+                    <label class="switch"><input type="checkbox" id="toggle-gps"><span class="slider"></span></label>
+                </div>
+                <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-50">
+                    <div>
+                        <label class="input-label mb-0">Auto Deteksi Petugas</label>
+                        <p class="text-[7px] font-bold text-slate-400 uppercase">Aktifkan pelacakan otomatis & Anti-Fake GPS</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-auto-detect">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card border-l-4 border-pink-500">
+            <div class="flex items-center justify-between mb-5 border-b border-slate-50 pb-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-xl">🎯</span>
+                    <h3 class="font-extrabold text-slate-800 text-sm uppercase">Sensitivitas AI Wajah</h3>
+                </div>
+                <span class="badge-info">Face-API.js</span>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <label class="input-label mb-0">Akurasi Verifikasi Login</label>
+                            <p class="text-[7px] font-bold text-slate-400 uppercase">Digunakan saat masuk akun / switch user</p>
+                        </div>
+                        <span id="val-accuracy-login" class="text-pink-600 font-black text-sm">0.1</span>
+                    </div>
+                    <input type="range" id="set-accuracy-login" min="0.05" max="0.6" step="0.05" value="0.1" 
+                           class="accent-pink-600 w-full cursor-pointer h-1.5 bg-slate-100 rounded-lg appearance-none" 
+                           oninput="document.getElementById('val-accuracy-login').innerText = this.value">
+                </div>
+
+                <div class="range-container">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <label class="input-label mb-0">Akurasi Deteksi Absen</label>
+                            <p class="text-[7px] font-bold text-slate-400 uppercase">Digunakan saat scan presensi masuk/pulang</p>
+                        </div>
+                        <span id="val-accuracy-absen" class="text-indigo-600 font-black text-sm">0.1</span>
+                    </div>
+                    <input type="range" id="set-accuracy-absen" min="0.05" max="0.6" step="0.05" value="0.1" 
+                           class="accent-indigo-600 w-full cursor-pointer h-1.5 bg-slate-100 rounded-lg appearance-none" 
+                           oninput="document.getElementById('val-accuracy-absen').innerText = this.value">
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-slate-50 rounded-2xl space-y-3">
+                <h4 class="text-[9px] font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <span>💡</span> Panduan Pengaturan Jarak (Threshold)
+                </h4>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="p-2 bg-white rounded-xl border border-slate-100">
+                        <p class="text-pink-600 font-black text-[9px]">0.05 - 0.15</p>
+                        <p class="text-[7px] font-bold text-slate-400 uppercase">SANGAT SENSITIF: Mudah mengenali wajah, cocok untuk HP spesifikasi rendah/pencahayaan minim.</p>
+                    </div>
+                    <div class="p-2 bg-white rounded-xl border border-slate-100">
+                        <p class="text-slate-800 font-black text-[9px]">0.20 - 0.40</p>
+                        <p class="text-[7px] font-bold text-slate-400 uppercase">STANDAR: Keseimbangan antara keamanan dan kemudahan penggunaan di lapangan.</p>
+                    </div>
+                </div>
+                <p class="text-[7px] text-slate-400 font-medium italic">* Nilai menunjukkan "Euclidean Distance". Semakin kecil angkanya, semakin toleran AI terhadap kemiripan wajah.</p>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="flex items-center gap-3 mb-5 border-b border-slate-50 pb-3">
+                <span class="text-xl">📅</span>
+                <h3 class="font-extrabold text-slate-800 text-sm uppercase">Jadwal Shift Kerja</h3>
+            </div>
+            
+            <div class="flex gap-2 mb-4">
+                <button onclick="switchShiftTab('reg')" id="tab-reg" class="tab-btn active">Senin - Kamis</button>
+                <button onclick="switchShiftTab('fri')" id="tab-fri" class="tab-btn">Jumat Khusus</button>
+            </div>
+
+            <div id="content-shift-reg" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="input-label">Masuk Mulai</label>
+                        <input type="time" id="in-start-reg" value="07:15">
+                    </div>
+                    <div>
+                        <label class="input-label">Batas Tepat Waktu</label>
+                        <input type="time" id="in-ontime-reg" value="08:00">
+                    </div>
+                </div>
+                <div>
+                    <label class="input-label">Batas Akhir Terlambat</label>
+                    <input type="time" id="in-late-reg" value="09:00">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="input-label">Pulang Mulai</label>
+                        <input type="time" id="out-start-reg" value="16:30">
+                    </div>
+                    <div>
+                        <label class="input-label">Pulang Selesai</label>
+                        <input type="time" id="out-end-reg" value="18:00">
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-shift-fri" class="space-y-4 hidden">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="input-label">Masuk Mulai</label>
+                        <input type="time" id="in-start-fri" value="07:15">
+                    </div>
+                    <div>
+                        <label class="input-label">Batas Tepat Waktu</label>
+                        <input type="time" id="in-ontime-fri" value="08:00">
+                    </div>
+                </div>
+                <div>
+                    <label class="input-label">Batas Akhir Terlambat</label>
+                    <input type="time" id="in-late-fri" value="09:00">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="input-label">Pulang Mulai</label>
+                        <input type="time" id="out-start-fri" value="11:30">
+                    </div>
+                    <div>
+                        <label class="input-label">Pulang Selesai</label>
+                        <input type="time" id="out-end-fri" value="13:00">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="flex items-center gap-3 mb-5 border-b border-slate-50 pb-3">
+                <span class="text-xl">🏝️</span>
+                <h3 class="font-extrabold text-slate-800 text-sm uppercase">Hari Kerja & Libur</h3>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="input-label">Format Hari Kerja</label>
+                    <select id="set-work-days">
+                        <option value="5">Senin - Jumat (5 Hari)</option>
+                        <option value="6">Senin - Sabtu (6 Hari)</option>
+                    </select>
+                </div>
+                <button onclick="toggleHoliday()" id="btn-holiday" class="w-full py-3 rounded-xl border-2 border-dashed border-slate-200 text-[10px] font-black uppercase text-slate-400 hover:border-pink-200 hover:text-pink-500">Aktifkan Mode Libur Nasional</button>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="flex items-center justify-between mb-5 border-b border-slate-50 pb-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-xl">📍</span>
+                    <h3 class="font-extrabold text-slate-800 text-sm uppercase">Koordinat & Radius</h3>
+                </div>
+                <button onclick="getCurrentLocation()" class="btn-gps">
+                    <span>📡</span> Lokasi Ini
+                </button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                    <label class="input-label">Latitude</label>
+                    <input type="text" id="set-lat" placeholder="Contoh: -2.637">
+                </div>
+                <div>
+                    <label class="input-label">Longitude</label>
+                    <input type="text" id="set-lng" placeholder="Contoh: 116.203">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="input-label">Radius (Meter)</label>
+                    <input type="number" id="set-radius" placeholder="100">
+                </div>
+                <div>
+                    <label class="input-label">Teks QR</label>
+                    <input type="text" id="set-qr" placeholder="PKM-SAMPANAHAN">
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="flex items-center justify-between border-b border-slate-50 pb-2 mb-3">
+                <label class="input-label mb-0">Audit Perubahan Admin</label>
+                <span class="text-[8px] font-black text-slate-300">READ ONLY</span>
+            </div>
+            <div id="audit-logs" class="text-[9px] font-bold text-slate-500 space-y-1.5 max-h-[80px] overflow-y-auto">
+                <div class="opacity-40">- Belum ada log tercatat hari ini -</div>
+            </div>
+        </div>
+
+        <div class="mt-2 mb-10">
+            <button onclick="saveAllSettings()" class="btn-primary uppercase text-xs">Simpan Perubahan ✅</button>
+            <p class="text-center text-[8px] font-bold text-slate-300 mt-4 uppercase tracking-[0.2em]">Adi.P Founder - it.barokah.net</p>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Powered by Barokah Developer</p>
+    </div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyDeWZyUvXj3qVOZXviPgN-d42jswXgkm2cvYlA7OBgGSPX-G_rxYti_rJWGVdpmi_f2A/exec";
+    const SECRET_KEY = "12345";
+    let appData = {};
+
+    function checkPass(val) {
+        if (val === SECRET_KEY) {
+            document.getElementById('modal-auth').style.display = 'none';
+            loadCurrentConfig();
+        } else if (val.length >= 5) {
+            document.getElementById('error-msg').classList.remove('hidden');
+            setTimeout(() => { 
+                document.getElementById('admin-password').value = ""; 
+                document.getElementById('error-msg').classList.add('hidden'); 
+            }, 1200);
+        }
+    }
+
+    async function loadCurrentConfig() {
+        showLoading(true, "Mendapatkan Data Cloud...");
+        try {
+            const response = await fetch(`${WEB_APP_URL}?action=getData`);
+            if (!response.ok) throw new Error();
+            const res = await response.json();
+            appData = res;
+            const config = res.config || {};
+
+            // Map data ke UI
+            document.getElementById('set-lat').value = config.LAT || "-2.637013";
+            document.getElementById('set-lng').value = config.LNG || "116.203609";
+            document.getElementById('set-radius').value = config.RADIUS || "100";
+            document.getElementById('set-qr').value = config.QR_TEXT || "PKM-SAMPANAHAN";
+            
+            // Map Akurasi Ganda (Login & Absen)
+            const accLogin = config.THRESHOLD_LOGIN || config.THRESHOLD || "0.1";
+            const accAbsen = config.THRESHOLD_ABSEN || config.THRESHOLD || "0.1";
+            
+            document.getElementById('set-accuracy-login').value = accLogin;
+            document.getElementById('val-accuracy-login').innerText = accLogin;
+            document.getElementById('set-accuracy-absen').value = accAbsen;
+            document.getElementById('val-accuracy-absen').innerText = accAbsen;
+            
+            // Map Shift Jam Kerja
+            if(config.SHIFT_DATA) {
+                const sd = JSON.parse(config.SHIFT_DATA);
+                document.getElementById('in-start-reg').value = sd.reg.inStart;
+                document.getElementById('in-ontime-reg').value = sd.reg.inOnTime;
+                document.getElementById('in-late-reg').value = sd.reg.inLate;
+                document.getElementById('out-start-reg').value = sd.reg.outStart;
+                document.getElementById('out-end-reg').value = sd.reg.outEnd;
+
+                document.getElementById('in-start-fri').value = sd.fri.inStart;
+                document.getElementById('in-ontime-fri').value = sd.fri.inOnTime;
+                document.getElementById('in-late-fri').value = sd.fri.inLate;
+                document.getElementById('out-start-fri').value = sd.fri.outStart;
+                document.getElementById('out-end-fri').value = sd.fri.outEnd;
+            }
+
+            // Map Toggles
+            document.getElementById('toggle-reg').checked = config.ALLOW_REG === true || config.ALLOW_REG === "true";
+            document.getElementById('toggle-mt').checked = config.MAINTENANCE === true || config.MAINTENANCE === "true";
+            document.getElementById('toggle-gps').checked = config.BYPASS_GPS === true || config.BYPASS_GPS === "true";
+            
+            // MAP SAKLAR BARU
+            document.getElementById('toggle-auto-detect').checked = config.AUTO_DETECT === true || config.AUTO_DETECT === "true";
+
+            // SINKRONISASI STATUS LIBUR DARI DB
+            const isHolidayDb = config.IS_HOLIDAY === true || config.IS_HOLIDAY === "true";
+            updateHolidayUI(isHolidayDb);
+
+            renderUserList(res.officers);
+            renderAuditLog(config.LAST_UPDATE);
+        } catch (e) { 
+            alert('Gagal Sinkronisasi! Cek Koneksi Internet.'); 
+        } finally { 
+            showLoading(false); 
+        }
+    }
+
+    function switchShiftTab(type) {
+        document.getElementById('tab-reg').classList.toggle('active', type === 'reg');
+        document.getElementById('tab-fri').classList.toggle('active', type === 'fri');
+        document.getElementById('content-shift-reg').classList.toggle('hidden', type !== 'reg');
+        document.getElementById('content-shift-fri').classList.toggle('hidden', type !== 'fri');
+    }
+
+    function getCurrentLocation() {
+        if (!navigator.geolocation) {
+            alert("Browser Anda tidak mendukung deteksi lokasi.");
+            return;
+        }
+        showLoading(true, "Mengunci Sinyal GPS...");
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                document.getElementById('set-lat').value = position.coords.latitude.toFixed(7);
+                document.getElementById('set-lng').value = position.coords.longitude.toFixed(7);
+                showLoading(false);
+                alert("Lokasi berhasil dikunci!");
+            },
+            (error) => {
+                showLoading(false);
+                alert("Gagal mendapatkan lokasi. Pastikan izin GPS aktif.");
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+
+    function renderUserList(users) {
+        const container = document.getElementById('user-list-container');
+        if(!users || users.length === 0) {
+            container.innerHTML = `<div class="text-center py-10 opacity-30">Tidak Ada Petugas</div>`;
+            return;
+        }
+        container.innerHTML = users.map(name => `
+            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100 hover:bg-white transition-all">
+                <span class="text-[11px] font-black text-slate-700 uppercase tracking-tight">${name}</span>
+                <button onclick="deleteUser('${name}')" class="btn-danger active:scale-95">Hapus</button>
+            </div>
+        `).join('');
+    }
+
+    async function deleteUser(name) {
+        if(!confirm(`⚠️ KONFIRMASI: Hapus permanen ${name} dari sistem?`)) return;
+        showLoading(true, `Menghapus Akun ${name}...`);
+        try {
+            const response = await fetch(`${WEB_APP_URL}?action=deleteOfficer&name=${encodeURIComponent(name)}`);
+            const res = await response.json();
+            if(res.status === "success") { 
+                alert(`Akun ${name} Berhasil Dihapus!`); 
+                loadCurrentConfig(); 
+            }
+        } catch (e) { 
+            alert('Gagal Menghapus Petugas.'); 
+        } finally { 
+            showLoading(false); 
+        }
+    }
+
+    async function saveAllSettings() {
+        showLoading(true, "Mengunggah Konfigurasi...");
+        
+        const shiftData = {
+            reg: {
+                inStart: document.getElementById('in-start-reg').value,
+                inOnTime: document.getElementById('in-ontime-reg').value,
+                inLate: document.getElementById('in-late-reg').value,
+                outStart: document.getElementById('out-start-reg').value,
+                outEnd: document.getElementById('out-end-reg').value
+            },
+            fri: {
+                inStart: document.getElementById('in-start-fri').value,
+                inOnTime: document.getElementById('in-ontime-fri').value,
+                inLate: document.getElementById('in-late-fri').value,
+                outStart: document.getElementById('out-start-fri').value,
+                outEnd: document.getElementById('out-end-fri').value
+            }
+        };
+
+        // CEK STATUS TOMBOL LIBUR SAAT INI
+        const btnHoliday = document.getElementById('btn-holiday');
+        const statusLibur = btnHoliday.classList.contains('bg-red-50');
+
+        const payload = {
+            LAT: document.getElementById('set-lat').value,
+            LNG: document.getElementById('set-lng').value,
+            RADIUS: document.getElementById('set-radius').value,
+            QR_TEXT: document.getElementById('set-qr').value,
+            THRESHOLD_LOGIN: document.getElementById('set-accuracy-login').value,
+            THRESHOLD_ABSEN: document.getElementById('set-accuracy-absen').value,
+            THRESHOLD: document.getElementById('set-accuracy-absen').value, 
+            ALLOW_REG: document.getElementById('toggle-reg').checked,
+            MAINTENANCE: document.getElementById('toggle-mt').checked,
+            BYPASS_GPS: document.getElementById('toggle-gps').checked,
+            AUTO_DETECT: document.getElementById('toggle-auto-detect').checked,
+            WORK_DAYS: document.getElementById('set-work-days').value,
+            SHIFT_DATA: JSON.stringify(shiftData),
+            IS_HOLIDAY: statusLibur, // VARIABEL BARU DISIMPAN KE DATABASE
+            LAST_UPDATE: new Date().toLocaleString('id-ID')
+        };
+
+        try {
+            const response = await fetch(`${WEB_APP_URL}?action=updateConfig&data=${encodeURIComponent(JSON.stringify(payload))}`);
+            const result = await response.json();
+            if (result.status === "success") { 
+                alert('Sistem Berhasil Diperbarui! ✅'); 
+                loadCurrentConfig(); // Refresh data setelah simpan
+            }
+        } catch (e) { 
+            alert('Gagal Menyimpan Ke Cloud.'); 
+        } finally { 
+            showLoading(false); 
+        }
+    }
+
+    // Fungsi Toggle Tombol (Hanya visual sementara sebelum ditekan Simpan Perubahan)
+    function toggleHoliday() {
+        const btn = document.getElementById('btn-holiday');
+        const currentlyActive = btn.classList.contains('bg-red-50');
+        updateHolidayUI(!currentlyActive);
+    }
+
+    // Fungsi Helper untuk Update Tampilan Tombol
+    function updateHolidayUI(isActive) {
+        const btn = document.getElementById('btn-holiday');
+        if(isActive) {
+            btn.classList.add('bg-red-50', 'text-red-500', 'border-red-200');
+            btn.innerText = "🛑 MODE LIBUR AKTIF (ABSEN MATI)";
+        } else {
+            btn.classList.remove('bg-red-50', 'text-red-500', 'border-red-200');
+            btn.innerText = "Aktifkan Mode Libur Nasional";
+        }
+    }
+
+    function renderAuditLog(lastUpdate) {
+        if(!lastUpdate) return;
+        const container = document.getElementById('audit-logs');
+        container.innerHTML = `<div class="bg-indigo-50 p-2 rounded-lg text-indigo-600 border border-indigo-100">
+            Terakhir diubah: ${lastUpdate} oleh Admin System
+        </div>`;
+    }
+
+    function showLoading(show, text = "Sinkronisasi...") {
+        document.getElementById('loading-text').innerText = text;
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.style.display = show ? 'flex' : 'none';
+    }
+</script>
+</body>
+</html>
