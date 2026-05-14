@@ -1048,7 +1048,7 @@
 </div>
 
 <script>
-    const APP_VERSION = "1.2.1"; 
+    const APP_VERSION = "1.2.2"; 
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyDeWZyUvXj3qVOZXviPgN-d42jswXgkm2cvYlA7OBgGSPX-G_rxYti_rJWGVdpmi_f2A/exec";
     
     let TARGET_LOC = { lat: -2.637013, lng: 116.203609, radius: 100 };
@@ -1728,6 +1728,11 @@
     }
 
     function checkShiftTime() {
+        // CEK STATUS LIBUR NASIONAL
+        if (state.data.config.IS_HOLIDAY === true) {
+            return { allow: false, msg: "Hari ini adalah Libur Nasional." };
+        }
+
         const now = new Date();
         const day = now.getDay(); 
         if (day === 0 || day === 6) return { allow: false, msg: "Hari ini libur (Sabtu/Minggu)." };
@@ -1824,7 +1829,9 @@
         if(statusEl) statusEl.innerText = "WAJAH TERKUNCI ✅";
         if(btn) { btn.disabled = false; btn.innerText = "KENALI SAYA & MASUK"; }
     } else {
-        // ... (sisanya tetap sama)
+        if(oval) { oval.classList.remove('valid'); if (detection) oval.classList.add('invalid'); }
+        if(statusEl) statusEl.innerText = alignment.status;
+        if(btn) { btn.disabled = true; btn.innerText = "MENCARI WAJAH..."; }
         state.faceDetectionFrame = requestAnimationFrame(detectFaceLoop);
     }
 }
