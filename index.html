@@ -752,7 +752,7 @@
                     <div id="daily-log-container" class="space-y-3"></div>
                 </div>
 
-                <div class="shift-detail-card" id="shift-detail-content">
+                <div class="shift-detail-card hidden" id="shift-detail-content">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                             <span class="text-lg">📅</span>
@@ -1792,7 +1792,7 @@
         const val = document.getElementById('select-user').value;
         if (mode === 'LOGIN' && val === 'NEW_REGISTER') return openRegister();
         if (mode === 'LOGIN' && val === 'ADMIN') return openAdminLogin();
-        if(!state.modelsLoaded) { showLoading(true, "Menyiapkan AI..."); await loadModels(); showLoading(false); }
+        if(!state.modelsLoaded) { showLoading(true, "Menyiapkan ..."); await loadModels(); showLoading(false); }
         document.getElementById('face-modal-title').innerText = mode === 'LOGIN' ? "Verifikasi Masuk" : "Verifikasi Absensi";
         document.getElementById('modal-face').style.display = 'flex';
         if (!(await getCameraStream('video-preview'))) return closeFaceModal();
